@@ -1,4 +1,19 @@
 ### Go ###
+# Object files and binaries from go.
+*.[568]
+
+# Library files.
+*.a
+
+# Any file prefixed by an underscore.
+*/_*
+
+# The mockgen binary.
+mockgen/mockgen
+
+# A binary produced by gotest.
+#gomock/[568]\.out
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -44,7 +59,6 @@ tags
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
-
 
 # Binaries
 /debug
