@@ -22,17 +22,28 @@
 
 package util
 
-import "net"
+import (
+	"fmt"
+	"net"
+)
 
 // ValidateMAC checks if the []byte passed is a Mac Address and if so, checks to see if it is valid.
 // ParseMAC parses s as an IEEE 802 MAC-48, EUI-48, EUI-64, or a 20-octet
 func ValidateMAC(bytes []byte) string {
 	var hw net.HardwareAddr
 	hw = bytes
+	if len(hw.String()) != 17 {
+		return ""
+	}
 	hw, err := net.ParseMAC(hw.String())
 	if err != nil {
 		return ""
 	}
 
 	return hw.String()
+}
+
+//FormatLog returns the message in the pattern that the developer wants.
+func FormatLog(host string, oid string, message string) string {
+	return fmt.Sprintf("host=%s oid=%s %s", host, oid, message)
 }

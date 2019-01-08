@@ -64,7 +64,7 @@ func (b *BulkWalkSnmp) BulkWalk(target string, oid string, community string) {
 		case gosnmp.OctetString:
 			mac := util.ValidateMAC(pdu.Value.([]byte))
 			if mac != "" {
-				buffer.WriteString(fmt.Sprintf("host=%s oid=%s value=%s\n", target, pdu.Name, mac))
+				buffer.WriteString(fmt.Sprintf("host=%s oid=%s mac=%s\n", target, pdu.Name, mac))
 				break
 			}
 			buffer.WriteString(fmt.Sprintf("host=%s oid=%s string=%s\n", target, pdu.Name, string(pdu.Value.([]byte))))
@@ -84,8 +84,8 @@ func (b *BulkWalkSnmp) BulkWalk(target string, oid string, community string) {
 //Run prepares the sample data and sets the Goroutine parameters.
 //TODO: Receive sample configuration parameters.
 func (b *BulkWalkSnmp) Run() {
-	host := "10.29.63.10"
-	oid := ".1.3.6.1.2.1"
+	host := "10.29.63.30"
+	oid := ".1.3.6.1.2.1.25.3.5.1"
 	community := "public"
 
 	b.BulkWalk(host, oid, community)
