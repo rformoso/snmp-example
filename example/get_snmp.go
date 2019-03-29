@@ -25,7 +25,6 @@ package example
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
@@ -52,41 +51,37 @@ func (g *GetersonSnmp) Get(host string, oids []string, community string, wg *syn
 		Port:      uint16(161),
 		Community: "public",
 		Version:   gosnmp.Version2c,
-		Timeout:   time.Duration(2) * time.Second,
+		Timeout:   time.Duration(500) * time.Millisecond,
 		Retries:   1,
 		MaxOids:   gosnmp.MaxOids,
 	}
 
 	err := params.Connect()
 	if err != nil {
-		log.Printf("Host=%s Connect() err: %v\n", host, err)
 		return
 	}
 	defer params.Conn.Close()
 
 	result, err := params.Get(oids)
 	if err != nil {
-		log.Printf("Host=%s Get() err: %v\n", host, err)
 		return
 	}
 
 	var buffer bytes.Buffer
 	for _, variable := range result.Variables {
-		buffer.WriteString(fmt.Sprintf("host=%s oid=%s ", host, variable.Name))
-
 		switch variable.Type {
 		case gosnmp.OctetString:
-			mac := util.ValidateMAC(variable.Value.([]byte))
-			if mac != "" {
-				buffer.WriteString(fmt.Sprintf("MAC address=%s\n", mac))
-				break
+			if len(variable.Value.([]byte)) != 0 {
+				mac := util.ValidateMAC(variable.Value.([]byte))
+				if mac != "" {
+					buffer.WriteString(util.FormatLog(host, variable.Name, fmt.Sprintf("MAC address=%s\n", mac)))
+					break
+				}
+				buffer.WriteString(util.FormatLog(host, variable.Name, fmt.Sprintf("string=%x\n", string(variable.Value.([]byte)))))
 			}
-			buffer.WriteString(fmt.Sprintf("string=%s\n", string(variable.Value.([]byte))))
-
 		case gosnmp.Integer:
-			buffer.WriteString(fmt.Sprintf("number=%d\n", gosnmp.ToBigInt(variable.Value)))
+			buffer.WriteString(util.FormatLog(host, variable.Name, fmt.Sprintf("number=%d\n", gosnmp.ToBigInt(variable.Value))))
 		}
-
 	}
 	resp <- buffer.String()
 }
@@ -102,11 +97,11 @@ func (g *GetersonSnmp) Run() {
 		host := fmt.Sprintf("10.29.63.%d", i)
 		oids := []string{
 			".1.3.6.1.2.1.2.2.1.6.1",
-			".1.3.6.1.2.1.1.5.0",
 			".1.3.6.1.2.1.2.2.1.6.2",
 			".1.3.6.1.2.1.2.2.1.6.3",
-			".1.3.6.1.2.1.4.2.0",
+			".1.3.6.1.2.1.1.1.0",
 		}
+
 		go g.Get(host, oids, "public", &wg, resp)
 	}
 
